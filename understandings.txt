@@ -1,0 +1,7 @@
+mongoose is used when you have to deal with HTTP requests/API.
+mongodb can be only used to push data to the mongodb db. But there is no server running.
+
+mongoose can work similar to mongodb without any HTTP which is without using express. Pushing data manually.
+But we can use express to run server, listen to a port and deal with HTTP requests. (get, post and all wont work without 
+express). mongoose is used to connect to the db, where as express is used for server side.
+
