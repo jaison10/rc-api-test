@@ -1,5 +1,6 @@
 const express = require('express')
 const User = require('../models/user')
+const bcrypt = require('bcryptjs')
 
 const router  = new express.Router()  // creating a router. 
 
@@ -13,11 +14,24 @@ router.post('/signup', async (req, res)=>{
     }catch(e){
         res.status(400).send("Couldnt add user details."+ e)
     }
-    // user.save().then(()=>{
-    //     res.status(201).send("User has been signed up."+ user)
-    // }).catch((err)=>{
-    //     res.status(400).send("Couldnt add user details."+ err)
-    // })
+})
+
+router.post('/login', async (req, res)=>{
+    
+    try{
+        const email = req.body.email;
+        const user =  await User.findOne({ email })
+        if(!user){
+            return res.status(404).send("No user found with this email.")
+        }
+        const isMatch = await bcrypt.compare(req.body.password, user.password)
+        if(!isMatch){
+            return res.status(400).send("Invalid password, cannot login.")
+        }
+        res.send("Logged in. " + user)
+    }catch(e){
+        res.status(500).send("Some error. : "+ e)
+    }
 })
 
 router.get('/user/:id',(req, res)=>{ 
@@ -47,7 +61,12 @@ router.patch('/user/:id', async (req, res)=>{
     }
 
     try{
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new : true, runValidators : true } );
+        // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new : true, runValidators : true } );
+        const user = await User.findById(req.params.id) // doing this method instead of above is the above one by passes the middleware, but we want middleware.
+        incomingUpdates.forEach((update)=> user[update] = req.body[update]);
+        await user.save()  // bcs middleware is applied for save.
+
+
         if(!user){
             return res.status(404).send("There is no such a user")
         }
