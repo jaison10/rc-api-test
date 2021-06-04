@@ -31,7 +31,11 @@ router.post('/login', async (req, res)=>{
             return res.status(400).send("Invalid password, cannot login.")
         }
         const token = await user.generateAuthToken()  // generating token on signing in.
-        res.send( { "logged In ": user, token})
+        // res.send( { "logged In ": user.getPublicProfile(), token})
+        // OR
+        res.send({"Logged In": user, token})
+        
+
     }catch(e){
         res.status(500).send("Some error. : "+ e)
     }

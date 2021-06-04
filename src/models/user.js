@@ -39,6 +39,29 @@ const userSchema = new mongoose.Schema({  // schema lets use take advantage of m
     }]
 })
 
+// userSchema.methods.getPublicProfile =  function(){
+//     const user = this
+//     const userObject = user.toObject()  // creates an object which can be edited
+
+//     delete userObject.tokens   // removes tokens array
+//     delete userObject.password
+
+//     return userObject
+// }
+
+// OR
+
+userSchema.methods.toJSON =  function(){
+    const user = this
+    const userObject = user.toObject()  // creates an object which can be edited
+
+    delete userObject.tokens   // removes tokens array
+    delete userObject.password
+
+    return userObject
+}
+
+
 userSchema.methods.generateAuthToken = async function(){
     const user = this  // this will have 'user' since this fun was called as user.generateAuthToken()
     const token = jwt.sign({ _id:user._id.toString() }, 'hackthistokenifyoucan')
