@@ -84,6 +84,30 @@ router.patch('/user/:id', async (req, res)=>{
     }
 })
 
+router.post('/logout', auth, async(req, res)=>{
+    try{
+        req.user.tokens = req.user.tokens.filter((token)=>{
+            return token.token !== req.token
+        })
+        await req.user.save()
+
+        res.send("Logged out")
+    }catch(e){
+        res.status(500).send("Couldnt logout")
+    }
+})
+
+router.post('/logoutAll', auth, async(req, res)=>{
+    try{
+        req.user.tokens = []
+        await req.user.save()
+
+        res.send("Logged out from all accounts.")
+    }catch(e){
+        res.status(500).send("Couldnt logout")
+    }
+})
+
 router.delete('/user/:id', async(req, res)=>{
     try{
         const userr = await User.findByIdAndDelete(req.params.id);

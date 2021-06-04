@@ -14,7 +14,8 @@ const auth = async (req, res, next)=>{
             throw new Error
         }
 
-        req.user = user
+        req.token = token  // an extra field to store the current token so that the same will be used while logging out.
+        req.user = user   // extra field to store user data, so that it can be used in router, neednt find user there again.
         next()
     }catch(e){
         res.status(401).send({"Error : Please authenticate":e})
