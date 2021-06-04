@@ -1,6 +1,7 @@
 const mongoose =  require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new mongoose.Schema({  // schema lets use take advantage of middleware.
     name:{
@@ -13,6 +14,7 @@ const userSchema = new mongoose.Schema({  // schema lets use take advantage of m
         required: true,
         trim: true,
         lowercase: true,
+        unique: true,
         validate(value){
             if(!validator.isEmail(value)){
                 throw new Error("Invalid Email");
@@ -28,8 +30,24 @@ const userSchema = new mongoose.Schema({  // schema lets use take advantage of m
             }
         },
         minlength: 6
-    }
+    },
+    tokens:[{
+        token:{   // saving tokens as an array so that they can login from multiple systems.
+            type: String, 
+            required: true
+        }
+    }]
 })
+
+userSchema.methods.generateAuthToken = async function(){
+    const user = this  // this will have 'user' since this fun was called as user.generateAuthToken()
+    const token = jwt.sign({ _id:user._id.toString() }, 'hackthistokenifyoucan')
+
+    user.tokens = user.tokens.concat({token})
+    await user.save()
+
+    return token
+}
 
 userSchema.pre('save', async function(next){  // this is how we use middleware. 'pre' is used bcs we want to use middleware before saving data.
     const user = this
