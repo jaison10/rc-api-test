@@ -45,21 +45,8 @@ router.get('/user/me', auth , (req,res)=>{
     res.send(req.user)  // this req.user is obtained from auth.js. Neednt do any try,catch thing bcs it is done there.
 })
 
-router.get('/user/:id',(req, res)=>{ 
-    const _id = req.params.id;  // mongoose automatically converts string id to ObjectID. Neednt do it manually like we did in case of mongodb.
 
-    User.findById(_id).then((userr)=>{
-        if(!userr){                        // doing this because finding no user is not an error, the code has run properly.
-            return res.status(404).send("There is no such a user")
-        }
-
-        res.status(200).send("User found." + userr)
-    }).catch((e)=>{
-        res.status(500).send("Well, got an error while reading user. " + e); // comes here if the length of id passed is < 24. May be since it converts to ObjectID by itself, it finds some problems I guess.
-    }) 
-});
-
-router.patch('/user/:id', async (req, res)=>{
+router.patch('/update/me', auth ,async (req, res)=>{
     // Making sure that we are letting the user update only the properties allowed. By default if non allowed are incoming, it will be ignored.
     // But we can return something in that case. That's why doing all this.
     const incomingUpdates = Object.keys(req.body);
@@ -73,16 +60,14 @@ router.patch('/user/:id', async (req, res)=>{
 
     try{
         // const user = await User.findByIdAndUpdate(req.params.id, req.body, { new : true, runValidators : true } );
-        const user = await User.findById(req.params.id) // doing this method instead of above is the above one by passes the middleware, but we want middleware.
-        incomingUpdates.forEach((update)=> user[update] = req.body[update]);
-        await user.save()  // bcs middleware is applied for save.
+        // const user = await User.findById(req.params.id) // doing this method instead of above is the above one by passes the middleware, but we want middleware.
+        
+        // not using above user is bcs we are getting user from auth, which is stored in req.user
+        
+        incomingUpdates.forEach((update)=> req.user[update] = req.body[update]);
+        await req.user.save()  // bcs middleware is applied for save.
 
-
-        if(!user){
-            return res.status(404).send("There is no such a user")
-        }
-
-        res.status(200).send(user);
+        res.status(200).send({"updated":req.user});
     }catch(e){
         res.status(400).send("error:  " + e);
     }
@@ -112,12 +97,16 @@ router.post('/logoutAll', auth, async(req, res)=>{
     }
 })
 
-router.delete('/user/:id', async(req, res)=>{
+router.delete('/delete/me', auth ,async(req, res)=>{
     try{
-        const userr = await User.findByIdAndDelete(req.params.id);
-        if(!userr){
-            return res.status(404).send("There is no such a user")
-        }
+        // const userr = await User.findByIdAndDelete(req.user._id);
+        // if(!userr){
+        //     return res.status(404).send("There is no such a user")
+        // }
+
+        // INSTEAD
+
+        await req.user.remove()   // mongoose provides this. Similar to save. This removes.
         res.status(200).send("User has been deleted");
     }catch(e){
         res.status(500).send("error:  " + e);
