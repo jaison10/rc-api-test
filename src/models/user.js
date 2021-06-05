@@ -61,10 +61,14 @@ userSchema.methods.toJSON =  function(){
     return userObject
 }
 
+var tokentemp
 
 userSchema.methods.generateAuthToken = async function(){
     const user = this  // this will have 'user' since this fun was called as user.generateAuthToken()
     const token = jwt.sign({ _id:user._id.toString() }, 'hackthistokenifyoucan')
+
+    tokentemp = token   // this is used to keep track of current user/the user in this system
+    // console.log(tokentemp);
 
     user.tokens = user.tokens.concat({token})
     await user.save()
@@ -82,6 +86,12 @@ userSchema.pre('save', async function(next){  // this is how we use middleware. 
     next()
 })
 
+function getToken(){
+    // console.log("came here");
+    // console.log(tokentemp);
+    return tokentemp                // returning token of the current logged user in this system.
+}
+
 const User = mongoose.model( 'User', userSchema)
 
-module.exports = User;
+module.exports = { User, getToken }
