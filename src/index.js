@@ -1,15 +1,15 @@
 const express = require('express');
 require('./db/mongoose')  // importing to make the database run along.
 const userRouter = require('./routers/user')
+var bodyParser = require('body-parser');
 
 const app = express();
 
-// MIDDLEWARE
-// app.use((req, res, next)=>{
-//     console.log(req.method, req.path)
+// app.use(express.static('../src/routers/public/login.html'))
+// app.use(bodyParser.urlencoded({   // this is imp to get req.body content from front end, else it will be undefined.
+//     extended:true
+// }));
 
-//     next()
-// })
 
 app.use(express.json()) //this lets you take the incoming items as json.
 

@@ -18,7 +18,8 @@ const auth = async (req, res, next)=>{
         req.user = user   // extra field to store user data, so that it can be used in router, neednt find user there again.
         next()
     }catch(e){
-        res.status(401).send({"Error : Please authenticate":e})
+        return res.sendFile('./public/login.html', { root: __dirname })  
+        // res.status(401).send({"Error : Please authenticate":e})
     }
 
 }

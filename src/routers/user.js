@@ -3,8 +3,16 @@ const { User } = require('../models/user')
 const bcrypt = require('bcryptjs')
 const auth = require('../middleware/auth')
 
+var expresss = require('express');
+app = expresss()
+app.use(expresss.static('public'));
+
+
 const router  = new express.Router()  // creating a router. 
 
+router.get('/', auth, (req, res)=>{
+    res.sendFile('./public/index.html', { root: __dirname })
+})
 
 router.post('/signup',  async (req, res)=>{ 
     const user = new User(req.body)
@@ -17,6 +25,10 @@ router.post('/signup',  async (req, res)=>{
         res.status(400).send("Couldnt add user details."+ e)
     }
 })
+
+// router.get('/login', auth, (req, res)=>{
+//     res.send("LOGGED In")
+// })
 
 router.post('/login', async (req, res)=>{
     
